@@ -70,13 +70,14 @@ const MONTHS = [
   // Only edit below this comment
   
   const createHtml = (athlete) => {
-	const firstName = data.response.data[athlete].firstName; 
-	const surname = data.response.data[athlete].surname; 
-	const id = data.response.data[athlete].id; 
-	const races = data.response.data[athlete].races.length
-	const reversedRaces = data.response.data[athlete].races.reverse()
-	const date = new Date(reversedRaces[0].date)
-	const timeAsArray = reversedRaces[0].time
+	console.log(athlete)
+	const {firstName, surname, id, races} = data.response.data[athlete]
+	const [{date, time: timeAsArray}] = [...races.reverse()]
+	console.log(date)
+	// look into spread operator
+	// use destructuring syntax to assign multiple variables
+	// make sure structure on left matches structure on right
+
 	// needed to save each of these in a separate variable
 	// need to access each from the object above using correct dot/bracket notation
 	// races needs to access the length of the races array within the object
@@ -95,10 +96,10 @@ const MONTHS = [
 	
 	const list = document.createElement('dl');
 	//missing quotes around dl
-  
-	const day = date.getDate();
-	const month = MONTHS[date.getMonth()];
-	const year = date.getFullYear();
+	
+	const day = new Date(date).getDate();
+	const month = MONTHS[new Date(date).getMonth()];
+	const year = new Date(date).getFullYear();
 	// missing consts for variable declaration
 	// need to use .getMonth() and .getFullYEar methods respectively instead of just .month/.year
 	// month accesses the corresponding key from MONTHS object
@@ -118,7 +119,7 @@ const MONTHS = [
 	  <dd>${firstName} ${surname}</dd>
   
 	  <dt>Total Races</dt>
-	  <dd>${races}</dd>
+	  <dd>${races.length}</dd>
   
 	  <dt>Event Date (Latest)</dt>
 	  <dd>${day} ${month} ${year}</dd>
@@ -136,6 +137,7 @@ const MONTHS = [
 	return fragment
 	// need to return the fragment so it can be passed into appendChild
   }
+
 
   document.querySelector('[data-athlete="NM372"]').appendChild(createHtml("NM372"));
   document.querySelector('[data-athlete="SV782"]').appendChild(createHtml("SV782"));
