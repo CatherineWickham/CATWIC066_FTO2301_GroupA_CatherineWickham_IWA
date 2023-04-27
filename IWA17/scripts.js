@@ -21,32 +21,34 @@ const getDaysInMonth = (date) => new Date(date.getFullYear(), date.getMonth() + 
 
 const createArray = (length) => {
     let result = []
-
     for ( let i = 0; i < length; i++) {
-        result.push(0)
+        result.push(null)
     }
-
     return result
 }
-// fixed for statement syntax
-// need to push null/empty to the array to fill up spaces
+// need to use let not const, result will be overwritten
+// fixed for statement syntax - set i to 0, set condition to i less than length, need to increment ii, semicolons
+// need to push to the array to crerate slots - used null as placeholder
 // need to return the resulting array
 
 const current = new Date
 current.setDate(1)
 
-const startDay = current.getDay() // should be getDay, missing decarations for all variables
+const startDay = current.getDay() // should be getDay
 const daysInMonth = getDaysInMonth(current)
+
+
 
 const createData = () => {
     const current = new Date
     current.setDate(1)
 
-    const startDay = current.getDay() // should be getDay, missing decarations for all variables
+    const startDay = current.getDay() // should be getDay
     const daysInMonth = getDaysInMonth(current)
 
+    // was missing const declarations for all variables
+
    let daysArray = []
-    
     for ( let i = 1; i <= 42; i++) {
         if (i <= startDay || i > daysInMonth + startDay) {
             daysArray.push("")
@@ -54,66 +56,38 @@ const createData = () => {
             daysArray.push(i - startDay)
         }
     }
-    
-    // let allDaysArrays = [
-    //     daysArray.slice(0,7),
-    //     daysArray.slice(7,14),
-    //     daysArray.slice(14,21),
-    //     daysArray.slice(21,28),
-    //     daysArray.slice(28,35),
-    //     daysArray.slice(35,43),
-    // ]
-    
-    let weeks = createArray(6)
-    let days = createArray(7)
+    // created external daysArray variable to keep track of the day of the month, seperately from loop
+    // included logic to deal with negative numbers/ numbers over the days in the month
+    // doesn't need to be inside loop, just create whitespace in daysArray
 
-    let dayOfMonth = 0
-    let daysArrayIndex = 0 
+    let weeks = createArray(6) // changed to 6 weeks - this month spreads over more than 5
+    let dayOfMonth = null // renamed value variable 
+    let daysArrayIndex = 0  // need to initialize daysArray index so it can be incremented inside loop
 
     for (let weekIndex in weeks) { // missing let
+        
+        let days = createArray(7) // moved to inside loop - allows varaible to reset with each iteration
+
         weeks[weekIndex] = {
             week: parseInt(weekIndex) + 1,
             days: days
         }
-                
-        // daysArray = allDaysArrays[parseInt(weekIndex)]
+        // needed to assign to correct index of weeks
+        // didn't use value variable, just assigned object directly
+        // needed to use parseInt on week index - was a string
+        // days needs to be an array with 7 slots that can be iterated over, not empty array
 
         for (let dayIndex in days) { // missing let
             
-            // dayOfMonth = allDaysArrays[parseInt(weekIndex)][daysArrayIndex]
-            // daysArrayIndex++
-            
-            dayOfMonth = daysArray[daysArrayIndex]
-            daysArrayIndex++
+            dayOfMonth = daysArray[daysArrayIndex] // assigns day of month value from external array
+            daysArrayIndex++ // increments the index so next iteration uses next number in this array
 
-            // day = day + parseInt(dayIndex) - startDay + 1 //TODO: Fix values in weeks after first
-
-            // day = day + weeks[parseInt(weekIndex) - 1].days[6].value
-            // day = day + weeks[parseInt(weekIndex) - 1]
-
-            // if (day <= 0 || day > daysInMonth) {
-            //     day = ""
-            // }
-
-            // weeks[weekIndex].days[dayIndex].dayOfWeek = parseInt(dayIndex) + 1
-            // weeks[weekIndex].days[dayIndex].dayOfMonth = dayOfMonth
-
-            weeks[weekIndex].days[dayIndex] = {
-                dayOfWeek: parseInt(dayIndex) + 1,
-                value: dayOfMonth
+            weeks[weekIndex].days[dayIndex] = { // is no result variable, are assiging into weeks array as object literal
+                dayOfWeek: parseInt(dayIndex) + 1, // week index was a string - parseInt
+                value: dayOfMonth // assigns value as dayOfMonth variable calculated above, no need for logic - predone in daysArray
             }
-            
-            // console.log(weeks)
-            // console.log(weeks[weekIndex].days[dayIndex])
-            // console.log("Week:", weekIndex, "Day:", dayIndex, "Date:", dayOfMonth)
-            // console.log(weeks[weekIndex].days[dayIndex])
         }
-        
-        // overwrites prev values of object with each iteration, so end up with last run of values in daysArray
-        // keeps putting values in same week
-        // could split up each array?
     }
-    // console.log(weeks)
     return weeks
     
 }
@@ -123,49 +97,61 @@ const createData = () => {
 const addCell = (existing, classString, value) => {
     const result = /* html */ `
         ${existing}
-        <td class=${classString}>
+        <td class="${classString}">
             ${value}
         </td>
     `
     return result
 } 
-// adding new cells before existing??
+// changed order so existing added first
 // missing class=""
 // missing return statement
 
 
 const createHtml = (data) => {
     let result = ''
-    let inner = ''
-    let combinedRows = ''
+    let combinedResults = '' // created variable to store all completed result <tr> elements
 
-    for (let index in data) {
-        
-        inner = addCell(inner, "table__cell table__cell_sidebar", `Week ${data[index].week}`) // missing $ in front of week and backticks
+    for (let weekIndex in data) { // can't use two variables in for loop, just need to loop through the week indices
+        let inner = ''
+
+        inner = addCell(inner, "table__cell table__cell_sidebar", `Week ${data[weekIndex].week}`) 
+        // missing $ in front of week and backticks
+        // need to assign result to inner variable to update it
     
-        for (let index2 in data[index].days) {
+        for (let dayIndex in data[weekIndex].days) { // days is an array, need to loop through indices, not properties
 
-            let isToday = (new Date("30 April 2023")).getDate() === data[index].days[index2].value // REMEMBER TO CHANGE BACK TO ACTUAL CURRENT DATE, NOT 30 April
-            let isWeekend = data[index].days[index2].dayOfWeek == 1 || data[index].days[index2].dayOfWeek == 7
-            let isAlternate = data[index].week % 2 == 0
+            let isToday = (new Date).getDate() === data[weekIndex].days[dayIndex].value
+            let isWeekend = data[weekIndex].days[dayIndex].dayOfWeek === 1 || data[weekIndex].days[dayIndex].dayOfWeek === 7
+            let isAlternate = data[weekIndex].week % 2 == 0
+            // for isToday, need to use getDate method to correspond to day value
+            // for is Weekend, need to use OR not AND, day cannot be Saturday and Sunday, changed operators to strict equality
+            // for isAlternate, need to check if remainder after divsion with 2=0, checking if even
+            // for all, missing full references to value/dayOfWeek
             
             let classString = "table__cell"
 			if (isToday === true) {classString = `${classString} table__cell_today`}
             if (isWeekend === true) {classString = `${classString} table__cell_weekend`}
             if (isAlternate === true) {classString = `${classString} table__cell_alternate`}
+            // added === true to make conditions more explicit
+            // missing {} around code block
+            // changed equality  after classString to assignment
+            // added $ to last two
 
-            let value = data[index].days[index2].value
+            let value = data[weekIndex].days[dayIndex].value
+            // need to assign the day to be printed into calendar as value to pass into below
 
             inner = addCell(inner, classString, value)
+            // need to assign result to inner variable to update it
 
             result = `<tr>${inner}</tr>`
         }
 
-       combinedRows = `${combinedRows}${result}`
+       combinedResults = `${combinedResults}${result}` 
+       // at end of outer loop, will have collected one weeks worth of data in result
+       // need to transfer into final combined results variable at this point so each is in a seperate row
     }
- console.log(combinedRows)
- return combinedRows
- 
+    return combinedResults // was missing a return statement
 }
 
 //  Only edit above
