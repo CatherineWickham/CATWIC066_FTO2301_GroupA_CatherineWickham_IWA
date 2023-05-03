@@ -259,6 +259,11 @@ const handleShowMore = () => {
     range = [(page - 1) * BOOKS_PER_PAGE, page * BOOKS_PER_PAGE]
     html.list.items.appendChild(createPreviewsFragment(matches, range))
 
+    const previewsArray = Array.from(document.querySelectorAll('.preview'))
+    for (const preview of previewsArray){
+        preview.addEventListener('click', handleOpenActivePreview)
+    }
+
     let remaining = initial - BOOKS_PER_PAGE
     let hasRemaining = remaining > 0
 
