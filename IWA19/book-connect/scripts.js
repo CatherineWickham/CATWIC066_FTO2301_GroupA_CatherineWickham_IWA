@@ -124,36 +124,54 @@ const handleSearchOpen = () => {
 
 const handleSearchCancel = () => {
     html.search.overlay.style.display = 'none'
+    html.search.form.reset()
 }
 
 const handleSearchSubmit = (event) => {
-    event.preventDefault()
-    console.log("search submitted")
     html.search.overlay.style.display = 'none'
-}
-
-const handleSettingsOpen = () => {
-    html.settings.overlay.style.display = 'block'
-}
-
-const handleSettingsCancel = () => {
-    html.settings.overlay.style.display = 'none'
-}
-
-const handleSettingsSubmit = (event) => {
     event.preventDefault()
-    console.log("settings submitted")
-    html.settings.overlay.style.display = 'none'
-}
+       
+    const formData = new FormData(event.target)
+    const filters = Object.fromEntries(formData)
 
-const handleShowMore = () => {
-    let initial = matches.length - (page * BOOKS_PER_PAGE)
+    let result = []
+
+    for (let singleBook in books) {
+        const titleMatch = filters.title.trim() === '' || (books[singleBook].title.toLowerCase()).includes(filters.title.toLowerCase())
+        const authorMatch = filters.author === 'any' || books[singleBook].author === filters.author
+        let genreMatch = false
+        
+            for (let singleGenre in books[singleBook].genres) {
+                if (filters.genre === 'any') {
+                    genreMatch = true
+                }
+                else if (books[singleBook].genres[singleGenre] === filters.genre) {
+                    genreMatch = true
+                }
+
+                // genreMatch = filters.genre === 'any' || books[singleBook].genres[singleGenre] === filters.genre
+            }
+
+            
+            //     genreMatch = filters.genre = 'any'
+            //     for (genre; book.genres; i++) { if singleGenre = filters.genre { genreMatch === true }}}
+            // }
+            // genre search not working - returns empty array
+
+        if (titleMatch && authorMatch && genreMatch) {
+            result.push(books[singleBook])
+        }
+    }
     
-    page = page + 1
+    matches = result
+    page = 1
     range = [(page - 1) * BOOKS_PER_PAGE, page * BOOKS_PER_PAGE]
+    html.list.button.disabled = false
+
+    html.list.items.innerHTML = ""
     html.list.items.appendChild(createPreviewsFragment(matches, range))
 
-    let remaining = initial - BOOKS_PER_PAGE
+    let remaining = matches.length - BOOKS_PER_PAGE
     let hasRemaining = remaining > 0
 
     html.list.button.innerHTML = /* html */ `
@@ -163,17 +181,46 @@ const handleShowMore = () => {
     if (hasRemaining === false) {
     html.list.button.disabled = true // may need to reset this to false if getting filtered results
     }
+    
+    html.search.form.reset()
 }
-//     // calculating nunmber remaining matches?
-//     initial === matches.length - [page * BOOKS_PER_PAGE]
-//     remaining === hasRemaining ? initial : 0
-//     data-list-button.disabled = initial > 0
+// data-search-form.click(filters) {
+//     preventDefault()
+//     const formData = new FormData(event.target)
+//     const filters = Object.fromEntries(formData)
+//     result = []
 
-//     // setting innerHTML for show more button - already did this?
-//     data-list-button.innerHTML = /* html */ `
-//         <span>Show more</span>
-//         <span class="list__remaining"> (${remaining})</span>
-//     `
+//     for (book; booksList; i++) {
+//         titleMatch = filters.title.trim() = '' && book.title.toLowerCase().includes[filters.title.toLowerCase()]
+//         authorMatch = filters.author = 'any' || book.author === filters.author
+
+//         {
+//             genreMatch = filters.genre = 'any'
+//             for (genre; book.genres; i++) { if singleGenre = filters.genre { genreMatch === true }}}
+//         }
+
+//         if titleMatch && authorMatch && genreMatch => result.push(book) // if matches criteria, push to result array
+//     }
+
+//     if display.length < 1 
+//     data-list-message.class.add('list__message_show')
+//     else data-list-message.class.remove('list__message_show')
+    // if no results, display no results message
+
+//     data-list-items.innerHTML = ''
+//     const fragment = document.createDocumentFragment()
+//     const extracted = source.slice(range[0], range[1]) // what is this range??? what is source?
+
+
+const handleSettingsOpen = () => {
+    html.settings.overlay.style.display = 'block'
+}
+
+const handleSettingsCancel = () => {
+    html.settings.overlay.style.display = 'none'
+}
+
+
 
 const handleOpenActivePreview = (event) => {
     html.list.active.style.display = 'block'
@@ -204,15 +251,43 @@ const handleCloseActivePreview = () => {
     html.list.active.style.display = 'none'
 }
 
+const handleShowMore = () => {
+    let initial = matches.length - (page * BOOKS_PER_PAGE)
+    
+    page = page + 1
+    range = [(page - 1) * BOOKS_PER_PAGE, page * BOOKS_PER_PAGE]
+    html.list.items.appendChild(createPreviewsFragment(matches, range))
+
+    let remaining = initial - BOOKS_PER_PAGE
+    let hasRemaining = remaining > 0
+
+    html.list.button.innerHTML = /* html */ `
+    <span>Show more</span>
+    <span class="list__remaining"> (${hasRemaining === true ? remaining : 0})</span>
+    `
+    if (hasRemaining === false) {
+    html.list.button.disabled = true // may need to reset this to false if getting filtered results
+    }
+}
+
+//     // calculating nunmber remaining matches?
+//     initial === matches.length - [page * BOOKS_PER_PAGE]
+//     remaining === hasRemaining ? initial : 0
+//     data-list-button.disabled = initial > 0
+
+//     // setting innerHTML for show more button - already did this?
+//     data-list-button.innerHTML = /* html */ `
+//         <span>Show more</span>
+//         <span class="list__remaining"> (${remaining})</span>
+//     `
+
 html.headerButtons.search.addEventListener('click', handleSearchOpen) 
 html.search.cancel.addEventListener('click', handleSearchCancel)
 html.search.form.addEventListener('submit', handleSearchSubmit)
 
 html.headerButtons.settings.addEventListener('click', handleSettingsOpen)
 html.settings.cancel.addEventListener('click', handleSettingsCancel)
-html.settings.form.addEventListener('submit', handleSettingsSubmit)
 
-html.list.button.addEventListener('click', handleShowMore)
 
 const previewsArray = Array.from(document.querySelectorAll('.preview'))
 for (const preview of previewsArray){
@@ -220,6 +295,7 @@ for (const preview of previewsArray){
 }
 html.list.close.addEventListener('click', handleCloseActivePreview)
 
+html.list.button.addEventListener('click', handleShowMore)
 
 // trying to create a list of genres to select from that goes in search menu dropdown
 // genres = document.createDocumentFragment()
@@ -377,31 +453,44 @@ document.querySelector('[data-search-authors]').appendChild(authorsList) //TODO:
 //     data-list-description === active.description
 // }
 
+const css = {
+    day: {
+        dark: '10, 10, 20',
+        light: '255, 255, 255',
+    },
+    night: {
+        dark: '255, 255, 255',
+        light: '10, 10, 20',
+    }
+}
 
+const handleSettingsSubmit = (event) => {
+    html.settings.overlay.style.display = 'none'
+    event.preventDefault()
 
-// // grouped theme settings
+    const formData = new FormData(event.target)
+    const { theme } = Object.fromEntries(formData)
 
-// // colors for day/night mode
-// // not sure how it is applied in CSS
-// day = {
-//     dark: '10, 10, 20',
-//     light: '255, 255, 255',
-// }
+    document.documentElement.style.setProperty('--color-dark', css[theme].dark)
+    document.documentElement.style.setProperty('--color-light', css[theme].light)
 
-// night = {
-//     dark: '255, 255, 255',
-//     light: '10, 10, 20',
-// }
+}
+html.settings.form.addEventListener('submit', handleSettingsSubmit)
 
-// // Theme settings - group with color values above
+if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    document.documentElement.style.setProperty('--color-dark', css.night.dark)
+    document.documentElement.style.setProperty('--color-light', css.night.light)
+}
+else {
+    document.documentElement.style.setProperty('--color-light', css.day.dark)
+    document.documentElement.style.setProperty('--color-light', css.day.light)
+}
 
 // data-settings-theme.value === window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'night' : 'day'
 // v = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches? 'night' | 'day'
 
 // documentElement.style.setProperty('--color-dark', css[v].dark);
 // documentElement.style.setProperty('--color-light', css[v].light);
-// // what is document element targeting? should it just be the whole document's style that is updated?
-// // check if --color-dark and --color-light properties are in document object
 
 // // handles theme menu settings submission
 // data-settings-overlay.submit; {
