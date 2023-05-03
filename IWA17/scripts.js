@@ -31,14 +31,6 @@ const createArray = (length) => {
 // need to push to the array to crerate slots - used null as placeholder
 // need to return the resulting array
 
-const current = new Date
-current.setDate(1)
-
-const startDay = current.getDay() // should be getDay
-const daysInMonth = getDaysInMonth(current)
-
-
-
 const createData = () => {
     const current = new Date
     current.setDate(1)
@@ -123,7 +115,7 @@ const createHtml = (data) => {
 
             let isToday = (new Date).getDate() === data[weekIndex].days[dayIndex].value
             let isWeekend = data[weekIndex].days[dayIndex].dayOfWeek === 1 || data[weekIndex].days[dayIndex].dayOfWeek === 7
-            let isAlternate = data[weekIndex].week % 2 == 0
+            let isAlternate = data[weekIndex].week % 2 === 0
             // for isToday, need to use getDate method to correspond to day value
             // for is Weekend, need to use OR not AND, day cannot be Saturday and Sunday, changed operators to strict equality
             // for isAlternate, need to check if remainder after divsion with 2=0, checking if even
