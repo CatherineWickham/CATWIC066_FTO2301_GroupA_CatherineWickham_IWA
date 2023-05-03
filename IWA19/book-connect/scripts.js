@@ -12,7 +12,6 @@ let range = [(page - 1) * BOOKS_PER_PAGE, page * BOOKS_PER_PAGE]
 if (!books || !Array.isArray(books)) throw new Error('Source required') // if books doesn't exist AND is not an array, throw error. Should be OR?
 if (!range || range.length < 2) throw new Error('Range must be an array with two numbers')
 
-
 // // populates data list with details of books in the extracted slice. How will this be updated if you want to see more than 36 results?
 // for (i = 0; i < extracted.length ; i++) { 
 //         // for loop not structured correctly, need to initialize i, set number of times loop will run
@@ -74,13 +73,13 @@ html.list.items.appendChild(createPreviewsFragment(matches, range))
 // // if number of matches is less than set number books per page, then disable show more button
 // data-list-button.disabled = !(matches.length - [page * BOOKS_PER_PAGE] > 0)
 
-let totalMatches = matches.length - (page * BOOKS_PER_PAGE)
+let remainingItems = matches.length - (page * BOOKS_PER_PAGE)
 
 html.list.button.innerHTML = /* html */ `
     <span>Show more</span>
-    <span class="list__remaining"> (${totalMatches > 0 ? totalMatches : 0})</span>
+    <span class="list__remaining"> (${remainingItems > 0 ? remainingItems : 0})</span>
 `
-if (totalMatches <= 0) {
+if (remainingItems <= 0) {
     html.list.button.disabled = true
 }
 // changed data-list-button.innerHTML to html.list.button.innerHTML
@@ -133,43 +132,47 @@ const handleSearchSubmit = (event) => {
        
     const formData = new FormData(event.target)
     const filters = Object.fromEntries(formData)
-
     let result = []
 
-    for (let singleBook in books) {
-        const titleMatch = filters.title.trim() === '' || (books[singleBook].title.toLowerCase()).includes(filters.title.toLowerCase())
-        const authorMatch = filters.author === 'any' || books[singleBook].author === filters.author
-        let genreMatch = false
-        
-            for (let singleGenre in books[singleBook].genres) {
-                if (filters.genre === 'any') {
-                    genreMatch = true
+    // if have time, replace if/else statement to address underlying issue - 7 entries have empty genre arrays
+    if (filters.title === "" && filters.genre === 'any' && filters.author === 'any') {
+        result = books
+    } else {        
+        for (let singleBook in books) {
+            const titleMatch = filters.title.trim() === '' || (books[singleBook].title.toLowerCase()).includes(filters.title.toLowerCase())
+            const authorMatch = filters.author === 'any' || books[singleBook].author === filters.author
+            let genreMatch = false
+           
+                for (let singleGenre in books[singleBook].genres) {
+                    if (filters.genre === 'any') {
+                        genreMatch = true
+                    }
+                    else if (books[singleBook].genres[singleGenre] === filters.genre) {
+                        genreMatch = true
+                    }
+                    // genreMatch = filters.genre === 'any' || books[singleBook].genres[singleGenre] === filters.genre
                 }
-                else if (books[singleBook].genres[singleGenre] === filters.genre) {
-                    genreMatch = true
-                }
-
-                // genreMatch = filters.genre === 'any' || books[singleBook].genres[singleGenre] === filters.genre
+                
+            if (titleMatch && authorMatch && genreMatch) {
+                result.push(books[singleBook])
             }
-
-            
-            //     genreMatch = filters.genre = 'any'
-            //     for (genre; book.genres; i++) { if singleGenre = filters.genre { genreMatch === true }}}
-            // }
-            // genre search not working - returns empty array
-
-        if (titleMatch && authorMatch && genreMatch) {
-            result.push(books[singleBook])
         }
     }
-    
+
     matches = result
+    matches.length === 0 ? html.list.message.style.display = 'block' : html.list.message.style.display = 'none'
+
     page = 1
     range = [(page - 1) * BOOKS_PER_PAGE, page * BOOKS_PER_PAGE]
     html.list.button.disabled = false
 
     html.list.items.innerHTML = ""
     html.list.items.appendChild(createPreviewsFragment(matches, range))
+
+    const previewsArray = Array.from(document.querySelectorAll('.preview'))
+    for (const preview of previewsArray){
+        preview.addEventListener('click', handleOpenActivePreview)
+    }
 
     let remaining = matches.length - BOOKS_PER_PAGE
     let hasRemaining = remaining > 0
@@ -181,7 +184,7 @@ const handleSearchSubmit = (event) => {
     if (hasRemaining === false) {
     html.list.button.disabled = true // may need to reset this to false if getting filtered results
     }
-    
+
     html.search.form.reset()
 }
 // data-search-form.click(filters) {
@@ -219,8 +222,6 @@ const handleSettingsOpen = () => {
 const handleSettingsCancel = () => {
     html.settings.overlay.style.display = 'none'
 }
-
-
 
 const handleOpenActivePreview = (event) => {
     html.list.active.style.display = 'block'

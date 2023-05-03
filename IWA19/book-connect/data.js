@@ -27,6 +27,7 @@ export const html = {
       title: document.querySelector('[data-list-title]'),
       subtitle: document.querySelector('[data-list-subtitle]'),
       description: document.querySelector('[data-list-description]'),
+      message: document.querySelector('[data-list-message]')
   }
 }
 
