@@ -1,6 +1,17 @@
-// need to add export statements and const declarations
-// added a map object containing querySelectors for DOM nodes
+/**
+ * Global constant containing the set number of books to be displayed on a single page of the app
+ */
+export const BOOKS_PER_PAGE = 36
 
+/**
+ * An object literal containing references to all DOM nodes that may need 
+ * to be targeted using query selectors during operation of the app. This ensures
+ * that all HTML elements can be easily referenced from a single data structure.
+ * The properties headerButtons, search, settings and list refer to the section
+ * of the document the elements are found in, while the properties nested below these
+ * refer to the elements themselves. Elements are accessed using selectors for their data
+ * attributes
+ */
 export const html = {
   headerButtons: {
       search: document.querySelector('[data-header-search]'), 
@@ -11,6 +22,8 @@ export const html = {
       cancel: document.querySelector('[data-search-cancel]'),
       form: document.querySelector('[data-search-form]'),
       title: document.querySelector('[data-search-title]'),
+      genres: document.querySelector('[data-search-genres]'), 
+      authors: document.querySelector('[data-search-authors]'),
   },
   settings: {
     overlay: document.querySelector('[data-settings-overlay]'),
@@ -20,19 +33,23 @@ export const html = {
   list: {
       button: document.querySelector('[data-list-button]'),
       items: document.querySelector('[data-list-items]'),
-      active: document.querySelector('[data-list-active]'),
       close: document.querySelector('[data-list-close]'),
-      blur: document.querySelector('[data-list-blur]'),
-      image: document.querySelector('[data-list-image]'),
-      title: document.querySelector('[data-list-title]'),
-      subtitle: document.querySelector('[data-list-subtitle]'),
-      description: document.querySelector('[data-list-description]'),
-      message: document.querySelector('[data-list-message]')
+      message: document.querySelector('[data-list-message]'),
+      active: {
+        preview: document.querySelector('[data-list-active]'),
+        blur: document.querySelector('[data-list-blur]'),
+        image: document.querySelector('[data-list-image]'),
+        title: document.querySelector('[data-list-title]'),
+        subtitle: document.querySelector('[data-list-subtitle]'),
+        description: document.querySelector('[data-list-description]'),
+      }
   }
 }
 
-export const BOOKS_PER_PAGE = 36
-
+/**
+ * An object literal containing all authors referenced in the {@link books} object.
+ * Keys are given as id codes that correspond to each author's name
+ */
 export const authors = {
   "194e164b-9365-4358-b44a-f28a93cc528f": "Steven D. Levitt",
   "76e8065c-fd7a-4a8b-a8ea-6105a47d0781": "Stephen J. Dubner",
@@ -123,6 +140,10 @@ export const authors = {
   "37018341-31f4-4ffa-8755-a49979c218dd": "Suzanne Collins"
 }
 
+/**
+ * An object literal containing all genres referenced in the {@link books} object.
+ * Keys are given as id codes that correspond to each genre name (given as a string)
+ */
 export const genres = {
   "a4f80b3e-3e96-4266-b729-e09b71793182": "Economics",
   "6dd5bb6e-0172-4d6e-aa18-26f00954dd7a": "Non-fiction",
@@ -194,6 +215,20 @@ export const genres = {
   "64c4197d-5f8e-4bff-b440-6d19bc591fd9": "Magic"
 }
 
+/**
+ * An array containing information for each book that can be accessed within the app.
+ * Each element of the array contains information for a single book in the form of 
+ * an object literal. It contains the following properties:
+ * id: gives each book a unique id code.
+ * genres: contains an array with all genre id codes that apply to the book as per {@link genres}.
+ * popularity: numerical popularity rating.
+ * image: url at which the book cover image can be accessed.
+ * description: a short summary of the book contents.
+ * pages: the length of the book in terms of page number.
+ * published: date of publication.
+ * author: id code of the book's author as per {@link authors}.
+ * 
+ */
 export const books = [
   {
     "id": "760b3450-9c86-42d0-8eff-e793bf823756",
